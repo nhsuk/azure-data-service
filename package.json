@@ -1,0 +1,50 @@
+{
+  "name": "azure-data-service",
+  "version": "0.1.0",
+  "description": "service to upload and retrieve latest files from azure storage",
+  "main": "azureDataService.js",
+  "repository": "https://github.com/nhsuk/azure-data-service.git",
+  "author": "mark <markharrop@yahoo.com>",
+  "license": "MIT",
+  "private": false,
+  "scripts": {
+    "coverage-check": "istanbul check-coverage --config .istanbul.yml",
+    "coverage-generate": "yarn istanbul cover -- _mocha -- --recursive test",
+    "coverage-upload-coveralls": "cat ./coverage/lcov.info | coveralls",
+    "git-hook": "yarn lint && yarn coverage-generate && yarn coverage-check",
+    "istanbul": "NODE_ENV=test istanbul",
+    "lint": "eslint --ext .js,.json .",
+    "postrewrite": "yarn git-hook",
+    "precommit": "yarn git-hook",
+    "prepush": "yarn git-hook",
+    "test": "NODE_ENV=test mocha --recursive test",
+    "test-ci": "yarn lint && yarn coverage-generate && yarn coverage-check && yarn coverage-upload-coveralls",
+    "test-integration": "NODE_ENV=test mocha --recursive test/integration",
+    "test-unit": "NODE_ENV=test mocha --recursive test/unit",
+    "test-watch": "yarn test --watch --reporter min",
+    "test-watch-integration": "yarn test-integration --watch --reporter min",
+    "test-watch-unit": "yarn test-unit --watch --reporter min"
+  },
+  "devDependencies": {
+    "chai": "^4.1.2",
+    "coveralls": "^3.0.0",
+    "eslint": "^4.18.2",
+    "eslint-config-airbnb-base": "^12.1.0",
+    "eslint-config-nhsuk": "^0.13.0",
+    "eslint-plugin-import": "^2.9.0",
+    "eslint-plugin-json": "^1.2.0",
+    "eslint-plugin-mocha": "^4.12.1",
+    "eslint-watch": "^3.1.3",
+    "husky": "^0.14.3",
+    "istanbul": "^1.1.0-alpha.1",
+    "mocha": "^5.0.0",
+    "nock": "^9.2.3",
+    "nodemon": "^1.17.2",
+    "snyk": "^1.70.2"
+  },
+  "dependencies": {
+    "azure-storage": "^2.8.1",
+    "moment": "^2.21.0",
+    "nhsuk-bunyan-logger": "^1.10.0"
+  }
+}
