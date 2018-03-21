@@ -4,6 +4,8 @@ const nock = require('nock');
 
 const azureService = require('../../lib/azureService');
 
+const containerName = 'data-test';
+
 const expect = chai.expect;
 // writing to a shared area, timestamp file to avoid collisions
 const name = `${new Date().getTime()}test.json`;
@@ -28,12 +30,12 @@ describe('Azure Service', () => {
   describe('upload, list and delete functions', () => {
     after(function deleteGeneratedFile(done) {
       this.timeout(timeout);
-      azureService.deleteFromAzure(name).then(() => done());
+      azureService.deleteFromAzure(containerName, name).then(() => done());
     });
 
     it('should upload file to azure', function test(done) {
       this.timeout(timeout);
-      azureService.uploadToAzure('test/output/test-file.json', name)
+      azureService.uploadToAzure(containerName, 'test/output/test-file.json', name)
         .then((result) => {
           expect(result.name).to.equal(name);
           done();
@@ -43,7 +45,7 @@ describe('Azure Service', () => {
 
     it('should list files in blob', function test(done) {
       this.timeout(timeout);
-      azureService.listBlobs()
+      azureService.listBlobs(containerName)
         .then((entries) => {
           expect(entries).to.exist;
           done();
@@ -56,13 +58,13 @@ describe('Azure Service', () => {
     it('should return the most recent blob based on the date embedded within the file name for those files that pass the filter applied', (done) => {
       const blobList = fs.readFileSync('test/resources/blobList.xml', 'utf8');
       nock(getEndpointUrl())
-        .get('/etl-test')
+        .get('/data-test')
         .query({ restype: 'container', comp: 'list' })
         .reply(200, blobList);
 
       const filter = b => b.name.startsWith('filter-match-');
 
-      azureService.getLatestBlob(filter)
+      azureService.getLatestBlob(containerName, filter)
         .then((latestBlob) => {
           expect(latestBlob.name).to.equal('filter-match-20180228.json');
           done();

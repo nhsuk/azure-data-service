@@ -1,6 +1,5 @@
 const chai = require('chai');
 const moment = require('moment');
-const log = require('../../lib/logger');
 
 const AzureDataService = require('../../AzureDataService');
 
@@ -12,10 +11,13 @@ const outputDir = './test/output';
 const filename = 'test-data';
 const summaryFilename = 'summary';
 const seedIdFile = 'test-seed-ids';
+const containerName = 'data-test';
+const stubbedLog = { info: () => { } };
 
 const azureDataService = new AzureDataService({
+  containerName,
   filename,
-  log,
+  log: stubbedLog,
   outputDir,
   seedIdFile,
   summaryFilename,

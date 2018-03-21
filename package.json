@@ -2,7 +2,7 @@
   "name": "azure-data-service",
   "version": "0.1.0",
   "description": "service to upload and retrieve latest files from azure storage",
-  "main": "azureDataService.js",
+  "main": "AzureDataService.js",
   "repository": "https://github.com/nhsuk/azure-data-service.git",
   "author": "mark <markharrop@yahoo.com>",
   "license": "MIT",
@@ -25,6 +25,14 @@
     "test-watch-integration": "yarn test-integration --watch --reporter min",
     "test-watch-unit": "yarn test-unit --watch --reporter min"
   },
+  "peer-dependencies": {
+    "azure-storage": "^2.8.1",
+    "moment": "^2.21.0"
+  },
+  "dependencies": {
+    "azure-storage": "^2.8.1",
+    "moment": "^2.21.0"
+  },
   "devDependencies": {
     "chai": "^4.1.2",
     "coveralls": "^3.0.0",
@@ -40,11 +48,7 @@
     "mocha": "^5.0.0",
     "nock": "^9.2.3",
     "nodemon": "^1.17.2",
-    "snyk": "^1.70.2"
-  },
-  "dependencies": {
-    "azure-storage": "^2.8.1",
-    "moment": "^2.21.0",
+    "snyk": "^1.70.2",
     "nhsuk-bunyan-logger": "^1.10.0"
   }
 }

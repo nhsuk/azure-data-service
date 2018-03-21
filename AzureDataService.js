@@ -6,15 +6,17 @@ const getDateFromFilename = require('./lib/getDateFromFilename');
 
 class AzureDataService {
   constructor(config) {
-    if (config.log && config.version && config.outputDir && config.filename) {
+    if (config.log && config.version && config.outputDir
+      && config.filename && config.containerName) {
       this.log = config.log;
-      this.version = config.version;
-      this.outputDir = config.outputDir;
+      this.containerName = config.containerName;
       this.filename = config.filename;
-      this.seedIdFile = config.seedIdFile;
-      this.summaryFilename = 'summary' || config.summaryFilename;
+      this.outputDir = config.outputDir;
       this.localFile = `${this.outputDir}/${this.filename}.json`;
+      this.summaryFilename = 'summary' || config.summaryFilename;
       this.localSummaryFile = `${this.outputDir}/${this.summaryFilename}.json`;
+      this.seedIdFile = config.seedIdFile;
+      this.version = config.version;
     } else {
       throw new Error('require log, version, outputDir and filename set');
     }
@@ -26,7 +28,7 @@ class AzureDataService {
 
   async downloadLatest(blobName, filename) {
     this.log.info(`Latest version of ${filename} file identified as '${blobName}'`);
-    await azureService.downloadFromAzure(filename, blobName);
+    await azureService.downloadFromAzure(this.containerName, filename, blobName);
     this.log.info(`Remote file '${blobName}' downloaded locally as: '${filename}'`);
     const data = fsHelper.loadJsonSync(filename);
     const date = getDateFromFilename(blobName);
@@ -34,7 +36,7 @@ class AzureDataService {
   }
   async getLatestIds() {
     const filter = b => b.name.startsWith(`${this.seedIdFile}-`);
-    const blob = await azureService.getLatestBlob(filter);
+    const blob = await azureService.getLatestBlob(this.containerName, filter);
     if (blob) {
       return this.downloadLatest(blob.name, `${this.outputDir}/${this.seedIdFile}.json`);
     }
@@ -43,7 +45,7 @@ class AzureDataService {
 
   async getLatestData() {
     const filter = createFilter(this.filename, this.version);
-    const lastScan = await azureService.getLatestBlob(filter, sortDateDesc);
+    const lastScan = await azureService.getLatestBlob(this.containerName, filter, sortDateDesc);
     if (lastScan) {
       return this.downloadLatest(lastScan.name, this.localFile);
     }
@@ -53,19 +55,19 @@ class AzureDataService {
 
   async uploadData(startMoment) {
     this.log.info(`Overwriting '${this.filename}' in Azure`);
-    await azureService.uploadToAzure(this.localFile, this.filename);
+    await azureService.uploadToAzure(this.containerName, this.localFile, this.filename);
     this.log.info(`Saving date stamped version of '${this.filename}' in Azure`);
-    await azureService.uploadToAzure(this.localFile, `${this.filename}${this.getSuffix(startMoment)}`);
+    await azureService.uploadToAzure(this.containerName, this.localFile, `${this.filename}${this.getSuffix(startMoment)}`);
   }
 
   async uploadIds(localIdFile, startMoment) {
     this.log.info(`Saving date stamped version of '${this.seedIdFile}' in Azure`);
-    await azureService.uploadToAzure(localIdFile, `${this.seedIdFile}${this.getSuffix(startMoment)}`);
+    await azureService.uploadToAzure(this.containerName, localIdFile, `${this.seedIdFile}${this.getSuffix(startMoment)}`);
   }
 
   async uploadSummary(startMoment) {
     this.log.info('Saving summary file in Azure');
-    await azureService.uploadToAzure(this.localSummaryFile, `${this.filename}-${this.summaryFilename}${this.getSuffix(startMoment)}`);
+    await azureService.uploadToAzure(this.containerName, this.localSummaryFile, `${this.filename}-${this.summaryFilename}${this.getSuffix(startMoment)}`);
   }
 }
 
