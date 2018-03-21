@@ -56,7 +56,7 @@ describe('Azure Service', () => {
     it('should return the most recent blob based on the date embedded within the file name for those files that pass the filter applied', (done) => {
       const blobList = fs.readFileSync('test/resources/blobList.xml', 'utf8');
       nock(getEndpointUrl())
-        .get('/etl-output')
+        .get('/etl-test')
         .query({ restype: 'container', comp: 'list' })
         .reply(200, blobList);
 
@@ -71,3 +71,4 @@ describe('Azure Service', () => {
     });
   });
 });
+
