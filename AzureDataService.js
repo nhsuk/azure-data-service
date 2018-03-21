@@ -7,18 +7,18 @@ const getDateFromFilename = require('./lib/getDateFromFilename');
 class AzureDataService {
   constructor(config) {
     if (config.log && config.version && config.outputDir
-      && config.filename && config.containerName) {
+      && config.outputFile && config.containerName) {
       this.log = config.log;
       this.containerName = config.containerName;
-      this.filename = config.filename;
+      this.outputFile = config.outputFile;
       this.outputDir = config.outputDir;
-      this.localFile = `${this.outputDir}/${this.filename}.json`;
+      this.localFile = `${this.outputDir}/${this.outputFile}.json`;
       this.summaryFilename = 'summary' || config.summaryFilename;
       this.localSummaryFile = `${this.outputDir}/${this.summaryFilename}.json`;
       this.seedIdFile = config.seedIdFile;
       this.version = config.version;
     } else {
-      throw new Error('require log, version, outputDir and filename set');
+      throw new Error('require log, version, outputDir and outputFile set');
     }
   }
 
@@ -44,7 +44,7 @@ class AzureDataService {
   }
 
   async getLatestData() {
-    const filter = createFilter(this.filename, this.version);
+    const filter = createFilter(this.outputFile, this.version);
     const lastScan = await azureService.getLatestBlob(this.containerName, filter, sortDateDesc);
     if (lastScan) {
       return this.downloadLatest(lastScan.name, this.localFile);
@@ -54,10 +54,10 @@ class AzureDataService {
   }
 
   async uploadData(startMoment) {
-    this.log.info(`Overwriting '${this.filename}' in Azure`);
-    await azureService.uploadToAzure(this.containerName, this.localFile, this.filename);
-    this.log.info(`Saving date stamped version of '${this.filename}' in Azure`);
-    await azureService.uploadToAzure(this.containerName, this.localFile, `${this.filename}${this.getSuffix(startMoment)}`);
+    this.log.info(`Overwriting '${this.outputFile}.json' in Azure`);
+    await azureService.uploadToAzure(this.containerName, this.localFile, `${this.outputFile}.json`);
+    this.log.info(`Saving date stamped version of '${this.outputFile}' in Azure`);
+    await azureService.uploadToAzure(this.containerName, this.localFile, `${this.outputFile}${this.getSuffix(startMoment)}`);
   }
 
   async uploadIds(localIdFile, startMoment) {
@@ -67,7 +67,7 @@ class AzureDataService {
 
   async uploadSummary(startMoment) {
     this.log.info('Saving summary file in Azure');
-    await azureService.uploadToAzure(this.containerName, this.localSummaryFile, `${this.filename}-${this.summaryFilename}${this.getSuffix(startMoment)}`);
+    await azureService.uploadToAzure(this.containerName, this.localSummaryFile, `${this.outputFile}-${this.summaryFilename}${this.getSuffix(startMoment)}`);
   }
 }
 
