@@ -10,7 +10,7 @@ Instantiated using `new AzureDataService(config)`.
 The config object requires `container`, `log`, `outputFile`, `outputDir`, and `version` populated.
 
 The `summaryFile` defaults to `summary` if none is provided.
-`seedIdFile` is only required if the ID management is functions are used.
+`seedIdFile` is only required if the `getLatestIds` and `uploadIds` functions are used.
 
 Sample instantiation:
 ```

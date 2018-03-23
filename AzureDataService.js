@@ -3,23 +3,20 @@ const createFilter = require('./lib/createFileVersionFilter');
 const fsHelper = require('./lib/fsHelper');
 const getDateFromFilename = require('./lib/getDateFromFilename');
 const sortDateDesc = require('./lib/sortByFilenameDateDesc');
+const validateConfig = require('./lib/validateConfig');
 
 class AzureDataService {
   constructor(config) {
-    if (config.log && config.version && config.outputDir
-      && config.outputFile && config.containerName) {
-      this.log = config.log;
-      this.containerName = config.containerName;
-      this.outputFile = config.outputFile;
-      this.outputDir = config.outputDir;
-      this.localFile = `${this.outputDir}/${this.outputFile}.json`;
-      this.summaryFilename = 'summary' || config.summaryFilename;
-      this.localSummaryFile = `${this.outputDir}/${this.summaryFilename}.json`;
-      this.seedIdFile = config.seedIdFile;
-      this.version = config.version;
-    } else {
-      throw new Error('require log, version, outputDir and outputFile set');
-    }
+    this.log = config.log;
+    this.containerName = config.containerName;
+    this.outputFile = config.outputFile;
+    this.outputDir = config.outputDir;
+    this.localFile = `${this.outputDir}/${this.outputFile}.json`;
+    this.summaryFilename = 'summary' || config.summaryFilename;
+    this.localSummaryFile = `${this.outputDir}/${this.summaryFilename}.json`;
+    this.seedIdFile = config.seedIdFile;
+    this.version = config.version;
+    validateConfig(this);
   }
 
   getSuffix(startMoment) {
@@ -29,11 +26,12 @@ class AzureDataService {
   async downloadLatest(blobName, filename) {
     this.log.info(`Latest version of ${filename} file identified as '${blobName}'`);
     await azureService.downloadFromAzure(this.containerName, filename, blobName);
-    this.log.info(`Remote file '${blobName}' downloaded locally as: '${filename}'`);
+    this.log.info(`Remote file '${blobName}' downloaded locally as '${filename}'`);
     const data = fsHelper.loadJsonSync(filename);
     const date = getDateFromFilename(blobName);
     return { data, date };
   }
+
   async getLatestIds() {
     const filter = b => b.name.startsWith(`${this.seedIdFile}-`);
     const blob = await azureService.getLatestBlob(this.containerName, filter);

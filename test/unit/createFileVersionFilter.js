@@ -1,4 +1,3 @@
-
 const chai = require('chai');
 const createFileVersionFilter = require('../../lib/createFileVersionFilter');
 
