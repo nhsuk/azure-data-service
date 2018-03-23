@@ -1,5 +1,5 @@
-const fs = require('fs');
 const chai = require('chai');
+const fs = require('fs');
 const nock = require('nock');
 
 const azureService = require('../../lib/azureService');

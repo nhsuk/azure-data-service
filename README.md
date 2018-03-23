@@ -1,5 +1,5 @@
 # Azure Data Service
-> service to upload and retrieve latest files from azure storage
+> service to upload and retrieve latest files from Azure Blob Storage
 
 ## Usage
 
@@ -20,12 +20,12 @@ const outputFile = 'test-data';
 const summaryFilename = 'summary';
 const seedIdFile = 'test-seed-ids';
 const containerName = 'data-test';
-const stubbedLog = logger;
+const log = logger;
 
 const azureDataService = new AzureDataService({
   containerName,
   outputFile,
-  log: logger,
+  log,
   outputDir,
   seedIdFile,
   summaryFilename,
@@ -39,7 +39,7 @@ const azureDataService = new AzureDataService({
 
 `getLatestData`: downloads the latest datestamped file matching the provided `version` and `outputFile` from the specified Azure Storage location to the `outputDir`.
 
-All upload functions take a `startMoment` parameter used to datestamp the file. For more on the `moment` library, see [the moment documentation](https://momentjs.com/docs/)
+All upload functions take a `startMoment` parameter used to datestamp the file. For more on the `moment` library, see the moment [documentation](https://momentjs.com/docs/).
 
 `uploadData` uploads the file specified in `outputFile` from `outputDir` to Azure Storage, along with a datestamped and versioned copy.
 

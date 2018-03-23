@@ -1,8 +1,8 @@
 const azureService = require('./lib/azureService');
-const fsHelper = require('./lib/fsHelper');
 const createFilter = require('./lib/createFileVersionFilter');
-const sortDateDesc = require('./lib/sortByFilenameDateDesc');
+const fsHelper = require('./lib/fsHelper');
 const getDateFromFilename = require('./lib/getDateFromFilename');
+const sortDateDesc = require('./lib/sortByFilenameDateDesc');
 
 class AzureDataService {
   constructor(config) {

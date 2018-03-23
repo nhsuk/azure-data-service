@@ -28,20 +28,6 @@ const timeOfEtl = moment('20180319');
 
 describe('Azure Data Service', function azureDataServiceTest() {
   this.timeout(timeout);
-  describe('download functions', () => {
-    it('should get latest data', async () => {
-      const { data, date } = await azureDataService.getLatestData();
-      expect(data).to.exist;
-      expect(date).to.exist;
-    });
-
-    it('should get latest ids', async () => {
-      const { data, date } = await azureDataService.getLatestIds();
-      expect(data).to.exist;
-      expect(date).to.exist;
-    });
-  });
-
   describe('upload functions', () => {
     it('should upload data', async () => {
       await azureDataService.uploadData(timeOfEtl);
@@ -53,6 +39,20 @@ describe('Azure Data Service', function azureDataServiceTest() {
 
     it('should upload ids', async () => {
       await azureDataService.uploadIds(`${outputDir}/cache-ids.json`, timeOfEtl);
+    });
+  });
+
+  describe('download functions', () => {
+    it('should get latest data', async () => {
+      const { data, date } = await azureDataService.getLatestData();
+      expect(data).to.exist;
+      expect(date).to.exist;
+    });
+
+    it('should get latest ids', async () => {
+      const { data, date } = await azureDataService.getLatestIds();
+      expect(data).to.exist;
+      expect(date).to.exist;
     });
   });
 });
