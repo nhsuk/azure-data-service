@@ -12,8 +12,8 @@ class AzureDataService {
     this.outputFile = config.outputFile;
     this.outputDir = config.outputDir;
     this.localFile = `${this.outputDir}/${this.outputFile}.json`;
-    this.summaryFilename = 'summary' || config.summaryFilename;
-    this.localSummaryFile = `${this.outputDir}/${this.summaryFilename}.json`;
+    this.summaryFile = config.summaryFile || 'summary';
+    this.localSummaryFile = `${this.outputDir}/${this.summaryFile}.json`;
     this.seedIdFile = config.seedIdFile;
     this.version = config.version;
     validateConfig(this);
@@ -65,7 +65,7 @@ class AzureDataService {
 
   async uploadSummary(startMoment) {
     this.log.info('Saving summary file in Azure');
-    await azureService.uploadToAzure(this.containerName, this.localSummaryFile, `${this.outputFile}-${this.summaryFilename}${this.getSuffix(startMoment)}`);
+    await azureService.uploadToAzure(this.containerName, this.localSummaryFile, `${this.outputFile}-${this.summaryFile}${this.getSuffix(startMoment)}`);
   }
 }
 

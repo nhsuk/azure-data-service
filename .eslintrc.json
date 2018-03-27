@@ -1,9 +1,3 @@
 {
-  "extends": "nhsuk",
-  "rules": {
-    "lines-between-class-members": [
-      "error",
-      "always"
-    ]
-  }
+  "extends": "nhsuk"
 }

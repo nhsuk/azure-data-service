@@ -71,5 +71,9 @@ describe('Azure Service', () => {
         })
         .catch(done);
     });
+
+    afterEach(() => {
+      nock.cleanAll();
+    });
   });
 });

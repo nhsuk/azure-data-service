@@ -6,14 +6,15 @@ const validConfig = {
   log: { info: () => { } },
   outputFile: 'output-file',
   outputDir: './output/dir',
-  summaryFilename: 'summary',
+  summaryFile: 'mySummary',
   version: '0.1',
 };
 
-describe('validate AzureDateService config', () => {
+describe('validate AzureDataService config', () => {
   it('should not throw error for validConfig', () => {
     validateConfig(validConfig);
   });
+
   describe('validate log', () => {
     it('should throw error for missing log', () => {
       const config = { ...validConfig };

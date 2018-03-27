@@ -9,7 +9,7 @@ const timeout = 15000;
 const version = '0.1';
 const outputDir = './test/output';
 const outputFile = 'test-data';
-const summaryFilename = 'summary';
+const summaryFile = 'summary';
 const seedIdFile = 'test-seed-ids';
 const containerName = 'data-test';
 const stubbedLog = { info: () => { } };
@@ -20,7 +20,7 @@ const azureDataService = new AzureDataService({
   log: stubbedLog,
   outputDir,
   seedIdFile,
-  summaryFilename,
+  summaryFile,
   version,
 });
 
