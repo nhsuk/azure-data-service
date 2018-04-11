@@ -1,6 +1,6 @@
 {
   "name": "azure-data-service",
-  "version": "0.1.1",
+  "version": "0.2.1",
   "description": "service to upload and retrieve latest files from azure storage",
   "main": "AzureDataService.js",
   "repository": "https://github.com/nhsuk/azure-data-service.git",

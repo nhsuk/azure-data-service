@@ -1,4 +1,11 @@
 # Azure Data Service
+
+[![GitHub Release](https://img.shields.io/github/release/nhsuk/azure-data-service.svg)](https://github.com/nhsuk/azure-data-service/releases/latest/)
+[![npm version](https://badge.fury.io/js/azure-data-service.svg)](https://badge.fury.io/js/azure-data-service)
+[![Greenkeeper badge](https://badges.greenkeeper.io/nhsuk/azure-data-service.svg)](https://greenkeeper.io/)
+[![Build Status](https://travis-ci.org/nhsuk/azure-data-service.svg?branch=master)](https://travis-ci.org/nhsuk/azure-data-service)
+[![Coverage Status](https://coveralls.io/repos/github/nhsuk/azure-data-service/badge.svg?branch=master)](https://coveralls.io/github/nhsuk/azure-data-service?branch=master)
+
 > service to upload and retrieve latest files from Azure Blob Storage
 
 ## Usage
