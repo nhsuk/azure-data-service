@@ -1,3 +1,7 @@
+const requireEnv = require('require-environment-variables');
+
+requireEnv(['AZURE_STORAGE_CONNECTION_STRING']);
+
 const azureService = require('./lib/azureService');
 const createFilter = require('./lib/createFileVersionFilter');
 const fsHelper = require('./lib/fsHelper');
