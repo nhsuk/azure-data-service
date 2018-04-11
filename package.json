@@ -1,6 +1,6 @@
 {
   "name": "azure-data-service",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "service to upload and retrieve latest files from azure storage",
   "main": "AzureDataService.js",
   "repository": "https://github.com/nhsuk/azure-data-service.git",
@@ -31,7 +31,8 @@
   },
   "dependencies": {
     "azure-storage": "^2.8.1",
-    "moment": "^2.21.0"
+    "moment": "^2.21.0",
+    "require-environment-variables": "^1.1.2"
   },
   "devDependencies": {
     "chai": "^4.1.2",
