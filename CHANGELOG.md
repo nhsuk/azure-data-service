@@ -1,4 +1,8 @@
-0.1.1 / 2018-04-11
+0.2.1 / 2018-04-11
+==================
+- Add badges to `README`
+
+0.2.0 / 2018-04-11
 ==================
 - Require `AZURE_STORAGE_CONNECTION_STRING`
 
