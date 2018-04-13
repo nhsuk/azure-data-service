@@ -1,3 +1,8 @@
+0.3.0 / 2018-04-13
+==================
+- Update npm dependencies
+- Remove snyk
+
 0.2.1 / 2018-04-11
 ==================
 - Add badges to `README`
