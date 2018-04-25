@@ -21,7 +21,6 @@ describe('create AzureDataService', () => {
       log: { info: () => { } },
       outputFile: 'output-file',
       outputDir: './output/dir',
-      seedIdFile: 'seed-ids',
       summaryFile: 'mySummary',
       version: '0.1',
     };
@@ -30,7 +29,7 @@ describe('create AzureDataService', () => {
     expect(service.log).to.be.equal(config.log);
     expect(service.outputFile).to.be.equal(config.outputFile);
     expect(service.outputDir).to.be.equal(config.outputDir);
-    expect(service.seedIdFile).to.be.equal(config.seedIdFile);
+    expect(service.seedIdFile).to.be.equal(`${config.outputFile}-seed-ids`);
     expect(service.summaryFile).to.be.equal(config.summaryFile);
     expect(service.version).to.be.equal(config.version);
   });

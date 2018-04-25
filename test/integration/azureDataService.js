@@ -38,7 +38,7 @@ describe('Azure Data Service', function azureDataServiceTest() {
     });
 
     it('should upload ids', async () => {
-      await azureDataService.uploadIds(`${outputDir}/cache-ids.json`, timeOfEtl);
+      await azureDataService.uploadIds(timeOfEtl);
     });
   });
 
