@@ -17,7 +17,6 @@ Instantiated using `new AzureDataService(config)`.
 The config object requires `container`, `log`, `outputFile`, `outputDir`, and `version` populated.
 
 The `summaryFile` defaults to `summary` if none is provided.
-`seedIdFile` is only required if the `getLatestIds` and `uploadIds` functions are used.
 
 Sample instantiation:
 ```
@@ -25,7 +24,6 @@ const version = '0.1';
 const outputDir = './test/output';
 const outputFile = 'test-data';
 const summaryFilename = 'summary';
-const seedIdFile = 'test-seed-ids';
 const containerName = 'data-test';
 const log = logger;
 
@@ -34,7 +32,6 @@ const azureDataService = new AzureDataService({
   outputFile,
   log,
   outputDir,
-  seedIdFile,
   summaryFilename,
   version,
 });
@@ -42,7 +39,8 @@ const azureDataService = new AzureDataService({
 
 ## Available Functions
 
-`getLatestIds`: downloads the latest datestamped file matching the provided `seedIdFile` from the specified Azure Storage location to the `outputDir`.
+`getLatestIds`: downloads the latest datestamped seed IDs file from the specified Azure Storage location to the `outputDir`.
+The Seed IDs filename is the output filename with a `seed-ids` suffix, i.e. in the example above the name would be `test-data-seed-ids`.
 
 `getLatestData`: downloads the latest datestamped file matching the provided `version` and `outputFile` from the specified Azure Storage location to the `outputDir`.
 
@@ -50,6 +48,6 @@ All upload functions take a `startMoment` parameter used to datestamp the file. 
 
 `uploadData` uploads the file specified in `outputFile` from `outputDir` to Azure Storage, along with a datestamped and versioned copy.
 
-`uploadIds` uploads the `localIdFile` file from `outputDir` to `seedIdFile` in Azure Storage, along with datestamped and versioned copy.
+`uploadIds` uploads the ID file from `outputDir` to `seedIdFile` in Azure Storage with datestamped suffix.
 
-`uploadSummary` uploads the summary file from `outputDir` to Azure Storage, with an `outputFile` prefix, and a datestamp and version suffix.
+`uploadSummary` uploads the summary file from `outputDir` to Azure Storage, with an `outputFile` prefix, a datestamp, and a version suffix.

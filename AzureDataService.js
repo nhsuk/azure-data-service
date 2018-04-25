@@ -9,6 +9,10 @@ const getDateFromFilename = require('./lib/getDateFromFilename');
 const sortDateDesc = require('./lib/sortByFilenameDateDesc');
 const validateConfig = require('./lib/validateConfig');
 
+function getSuffix(startMoment) {
+  return `-${startMoment.format('YYYYMMDD')}.json`;
+}
+
 class AzureDataService {
   constructor(config) {
     this.log = config.log;
@@ -18,12 +22,13 @@ class AzureDataService {
     this.localFile = `${this.outputDir}/${this.outputFile}.json`;
     this.summaryFile = config.summaryFile || 'summary';
     this.localSummaryFile = `${this.outputDir}/${this.summaryFile}.json`;
-    this.seedIdFile = config.seedIdFile;
+    this.seedIdFile = `${config.outputFile}-seed-ids`;
+    this.localSeedIdFile = `${this.outputDir}/${this.seedIdFile}.json`;
     this.version = config.version;
     validateConfig(this);
   }
 
-  getSuffix(startMoment) {
+  getSuffixWithVersion(startMoment) {
     return `-${startMoment.format('YYYYMMDD')}-${this.version}.json`;
   }
 
@@ -40,7 +45,7 @@ class AzureDataService {
     const filter = b => b.name.startsWith(`${this.seedIdFile}-`);
     const blob = await azureService.getLatestBlob(this.containerName, filter);
     if (blob) {
-      return this.downloadLatest(blob.name, `${this.outputDir}/${this.seedIdFile}.json`);
+      return this.downloadLatest(blob.name, this.localSeedIdFile);
     }
     throw Error('unable to retrieve ID list');
   }
@@ -59,17 +64,17 @@ class AzureDataService {
     this.log.info(`Overwriting '${this.outputFile}.json' in Azure`);
     await azureService.uploadToAzure(this.containerName, this.localFile, `${this.outputFile}.json`);
     this.log.info(`Saving date stamped version of '${this.outputFile}' in Azure`);
-    await azureService.uploadToAzure(this.containerName, this.localFile, `${this.outputFile}${this.getSuffix(startMoment)}`);
+    await azureService.uploadToAzure(this.containerName, this.localFile, `${this.outputFile}${this.getSuffixWithVersion(startMoment)}`);
   }
 
-  async uploadIds(localIdFile, startMoment) {
+  async uploadIds(startMoment) {
     this.log.info(`Saving date stamped version of '${this.seedIdFile}' in Azure`);
-    await azureService.uploadToAzure(this.containerName, localIdFile, `${this.seedIdFile}${this.getSuffix(startMoment)}`);
+    await azureService.uploadToAzure(this.containerName, this.localSeedIdFile, `${this.seedIdFile}${getSuffix(startMoment)}`);
   }
 
   async uploadSummary(startMoment) {
     this.log.info('Saving summary file in Azure');
-    await azureService.uploadToAzure(this.containerName, this.localSummaryFile, `${this.outputFile}-${this.summaryFile}${this.getSuffix(startMoment)}`);
+    await azureService.uploadToAzure(this.containerName, this.localSummaryFile, `${this.outputFile}-${this.summaryFile}${this.getSuffixWithVersion(startMoment)}`);
   }
 }
 

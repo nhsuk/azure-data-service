@@ -1,7 +1,8 @@
-0.3.0 / 2018-04-13
+0.3.0 / 2018-04-25
 ==================
 - Update npm dependencies
 - Remove snyk
+- Name seed ID file after output file name
 
 0.2.1 / 2018-04-11
 ==================
