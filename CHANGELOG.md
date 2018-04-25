@@ -1,4 +1,4 @@
-0.3.0 / TBA
+0.3.0 / 2018-04-25
 ==================
 - Update npm dependencies
 - Remove snyk
