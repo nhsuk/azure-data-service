@@ -3,10 +3,10 @@ const requireEnv = require('require-environment-variables');
 requireEnv(['AZURE_STORAGE_CONNECTION_STRING']);
 
 const azureService = require('./lib/azureService');
-const createFilter = require('./lib/createFileVersionFilter');
+const createFileVersionFilter = require('./lib/createFileVersionFilter');
+const createExpiredFileFilter = require('./lib/createExpiredFileFilter');
 const fsHelper = require('./lib/fsHelper');
 const getDateFromFilename = require('./lib/getDateFromFilename');
-const sortDateDesc = require('./lib/sortByFilenameDateDesc');
 const validateConfig = require('./lib/validateConfig');
 
 function getSuffix(startMoment) {
@@ -51,8 +51,8 @@ class AzureDataService {
   }
 
   async getLatestData() {
-    const filter = createFilter(this.outputFile, this.version);
-    const lastScan = await azureService.getLatestBlob(this.containerName, filter, sortDateDesc);
+    const filter = createFileVersionFilter(this.outputFile, this.version);
+    const lastScan = await azureService.getLatestBlob(this.containerName, filter);
     if (lastScan) {
       return this.downloadLatest(lastScan.name, this.localFile);
     }
@@ -75,6 +75,27 @@ class AzureDataService {
   async uploadSummary(startMoment) {
     this.log.info('Saving summary file in Azure');
     await azureService.uploadToAzure(this.containerName, this.localSummaryFile, `${this.outputFile}-${this.summaryFile}${this.getSuffixWithVersion(startMoment)}`);
+  }
+
+  async pruneDataFiles(oldestMoment, files) {
+    const expiredFileFilter = createExpiredFileFilter(this.outputFile, this.version, oldestMoment);
+    const expiredFiles = files.filter(expiredFileFilter);
+
+    const fileVersionFilter = createFileVersionFilter(this.outputFile, this.version);
+    const latestData = await azureService.getLatestBlob(this.containerName, fileVersionFilter);
+    // eslint-disable-next-line no-restricted-syntax
+    for (const file of expiredFiles) {
+      // safeguard to stop deleting latest data
+      if (file.name !== latestData.name) {
+        // eslint-disable-next-line no-await-in-loop
+        await azureService.deleteFromAzure(this.containerName, file.name);
+      }
+    }
+  }
+
+  async pruneFilesOlderThan(oldestMoment) {
+    const files = await azureService.listBlobs(this.containerName);
+    await this.pruneDataFiles(oldestMoment, files);
   }
 }
 

@@ -52,6 +52,15 @@ describe('Azure Service', () => {
         })
         .catch(done);
     });
+
+    it('should fail silently for delete of missing file', function test(done) {
+      this.timeout(timeout);
+      azureService.deleteFromAzure(containerName, 'notAnExistingFile.xml')
+        .then(() => {
+          done();
+        })
+        .catch(done);
+    });
   });
 
   describe('getLatestBlob', () => {
