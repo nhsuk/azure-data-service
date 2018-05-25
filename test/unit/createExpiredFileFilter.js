@@ -1,6 +1,6 @@
 const chai = require('chai');
 const moment = require('moment');
-const createFilter = require('../../lib/createExpiredFileFilter');
+const createFilter = require('../../lib/filters').createExpiredDataFilter;
 
 const expect = chai.expect;
 

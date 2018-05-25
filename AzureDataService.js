@@ -4,7 +4,7 @@ requireEnv(['AZURE_STORAGE_CONNECTION_STRING']);
 
 const azureService = require('./lib/azureService');
 const createFileVersionFilter = require('./lib/createFileVersionFilter');
-const createExpiredFileFilter = require('./lib/createExpiredFileFilter');
+const filters = require('./lib/filters');
 const fsHelper = require('./lib/fsHelper');
 const getDateFromFilename = require('./lib/getDateFromFilename');
 const validateConfig = require('./lib/validateConfig');
@@ -78,15 +78,39 @@ class AzureDataService {
   }
 
   async pruneDataFiles(oldestMoment, files) {
-    const expiredFileFilter = createExpiredFileFilter(this.outputFile, this.version, oldestMoment);
-    const expiredFiles = files.filter(expiredFileFilter);
-
+    const filter = filters.createExpiredDataFilter(this.outputFile, this.version, oldestMoment);
     const fileVersionFilter = createFileVersionFilter(this.outputFile, this.version);
-    const latestData = await azureService.getLatestBlob(this.containerName, fileVersionFilter);
+    await this.pruneExpiredFiles(files, filter, fileVersionFilter);
+  }
+
+  async pruneIdListFiles(oldestMoment, files) {
+    const filter = filters.createExpiredIdListFilter(this.outputFile, this.version, oldestMoment);
+    const latestFilter = b => b.name.startsWith(`${this.seedIdFile}-`);
+    await this.pruneExpiredFiles(files, filter, latestFilter);
+  }
+
+  async pruneSummaryFiles(oldestMoment, files) {
+    const filter = filters.createExpiredSummaryFilter(
+      this.outputFile,
+      this.summaryFile,
+      this.version, oldestMoment
+    );
+    const expiredFiles = files.filter(filter);
+    // eslint-disable-next-line no-restricted-syntax
+    for (const file of expiredFiles) {
+      // eslint-disable-next-line no-await-in-loop
+      await azureService.deleteFromAzure(this.containerName, file.name);
+    }
+  }
+
+  async pruneExpiredFiles(files, filter, latestFilter) {
+    const expiredFiles = files.filter(filter);
+
+    const latest = await azureService.getLatestBlob(this.containerName, latestFilter);
     // eslint-disable-next-line no-restricted-syntax
     for (const file of expiredFiles) {
       // safeguard to stop deleting latest data
-      if (file.name !== latestData.name) {
+      if (!latest || file.name !== latest.name) {
         // eslint-disable-next-line no-await-in-loop
         await azureService.deleteFromAzure(this.containerName, file.name);
       }
@@ -95,7 +119,12 @@ class AzureDataService {
 
   async pruneFilesOlderThan(oldestMoment) {
     const files = await azureService.listBlobs(this.containerName);
-    await this.pruneDataFiles(oldestMoment, files);
+    if (files) {
+      await this.pruneDataFiles(oldestMoment, files);
+      await this.pruneIdListFiles(oldestMoment, files);
+      await this.pruneDataFiles(oldestMoment, files);
+      await this.pruneSummaryFiles(oldestMoment, files);
+    }
   }
 }
 
