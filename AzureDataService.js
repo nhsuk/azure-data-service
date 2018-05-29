@@ -3,15 +3,11 @@ const requireEnv = require('require-environment-variables');
 requireEnv(['AZURE_STORAGE_CONNECTION_STRING']);
 
 const azureService = require('./lib/azureService');
-const createFilter = require('./lib/createFileVersionFilter');
+const filters = require('./lib/filters');
 const fsHelper = require('./lib/fsHelper');
 const getDateFromFilename = require('./lib/getDateFromFilename');
-const sortDateDesc = require('./lib/sortByFilenameDateDesc');
 const validateConfig = require('./lib/validateConfig');
-
-function getSuffix(startMoment) {
-  return `-${startMoment.format('YYYYMMDD')}.json`;
-}
+const libConfig = require('./lib/config');
 
 class AzureDataService {
   constructor(config) {
@@ -25,11 +21,16 @@ class AzureDataService {
     this.seedIdFile = `${config.outputFile}-seed-ids`;
     this.localSeedIdFile = `${this.outputDir}/${this.seedIdFile}.json`;
     this.version = config.version;
+    this.dateFormat = libConfig.dateFormat;
     validateConfig(this);
   }
 
+  getSuffix(startMoment) {
+    return `-${startMoment.format(this.dateFormat)}.json`;
+  }
+
   getSuffixWithVersion(startMoment) {
-    return `-${startMoment.format('YYYYMMDD')}-${this.version}.json`;
+    return `-${startMoment.format(this.dateFormat)}-${this.version}.json`;
   }
 
   async downloadLatest(blobName, filename) {
@@ -51,8 +52,8 @@ class AzureDataService {
   }
 
   async getLatestData() {
-    const filter = createFilter(this.outputFile, this.version);
-    const lastScan = await azureService.getLatestBlob(this.containerName, filter, sortDateDesc);
+    const filter = filters.createFileVersionFilter(this.outputFile, this.version);
+    const lastScan = await azureService.getLatestBlob(this.containerName, filter);
     if (lastScan) {
       return this.downloadLatest(lastScan.name, this.localFile);
     }
@@ -69,12 +70,57 @@ class AzureDataService {
 
   async uploadIds(startMoment) {
     this.log.info(`Saving date stamped version of '${this.seedIdFile}' in Azure`);
-    await azureService.uploadToAzure(this.containerName, this.localSeedIdFile, `${this.seedIdFile}${getSuffix(startMoment)}`);
+    await azureService.uploadToAzure(this.containerName, this.localSeedIdFile, `${this.seedIdFile}${this.getSuffix(startMoment)}`);
   }
 
   async uploadSummary(startMoment) {
     this.log.info('Saving summary file in Azure');
     await azureService.uploadToAzure(this.containerName, this.localSummaryFile, `${this.outputFile}-${this.summaryFile}${this.getSuffixWithVersion(startMoment)}`);
+  }
+
+  async pruneDataFiles(oldestMoment, files) {
+    const filter = filters.createExpiredDataFilter(this.outputFile, this.version, oldestMoment);
+    const fileVersionFilter = filters.createFileVersionFilter(this.outputFile, this.version);
+    await this.pruneExpiredFiles(files, filter, fileVersionFilter);
+  }
+
+  async pruneIdListFiles(oldestMoment, files) {
+    const filter = filters.createExpiredIdListFilter(this.outputFile, this.version, oldestMoment);
+    const latestFilter = filters.createIdListFilter(this.seedIdFile);
+    await this.pruneExpiredFiles(files, filter, latestFilter);
+  }
+
+  async pruneSummaryFiles(oldestMoment, files) {
+    const filter = filters.createExpiredSummaryFilter(
+      this.outputFile,
+      this.summaryFile,
+      this.version, oldestMoment
+    );
+    const latestFilter = filters.createSummaryFileFilter(this.outputFile, this.summaryFile);
+    await this.pruneExpiredFiles(files, filter, latestFilter);
+  }
+
+  async pruneExpiredFiles(files, filter, latestFilter) {
+    const expiredFiles = files.filter(filter);
+
+    const latest = await azureService.getLatestBlob(this.containerName, latestFilter);
+    // eslint-disable-next-line no-restricted-syntax
+    for (const file of expiredFiles) {
+      // safeguard to stop deleting latest data
+      if (!latest || file.name !== latest.name) {
+        // eslint-disable-next-line no-await-in-loop
+        await azureService.deleteFromAzure(this.containerName, file.name);
+      }
+    }
+  }
+
+  async pruneFilesOlderThan(oldestMoment) {
+    const files = await azureService.listBlobs(this.containerName);
+    if (files) {
+      await this.pruneDataFiles(oldestMoment, files);
+      await this.pruneIdListFiles(oldestMoment, files);
+      await this.pruneSummaryFiles(oldestMoment, files);
+    }
   }
 }
 

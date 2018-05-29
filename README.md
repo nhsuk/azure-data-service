@@ -51,3 +51,5 @@ All upload functions take a `startMoment` parameter used to datestamp the file. 
 `uploadIds` uploads the ID file from `outputDir` to `seedIdFile` in Azure Storage with datestamped suffix.
 
 `uploadSummary` uploads the summary file from `outputDir` to Azure Storage, with an `outputFile` prefix, a datestamp, and a version suffix.
+
+`pruneFilesOlderThan` removes all files prior to the provided moment parameter. The latest data, ID list and summary file will remain to prevent data loss.

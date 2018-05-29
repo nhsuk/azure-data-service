@@ -1,3 +1,7 @@
+0.4.0 / 2018-05-29
+==================
+- Provide function to purge old files
+
 0.3.0 / 2018-04-25
 ==================
 - Update npm dependencies
