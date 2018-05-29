@@ -3,7 +3,7 @@ const moment = require('moment');
 
 const AzureDataService = require('../../AzureDataService');
 const azureService = require('../../lib/azureService');
-const createFileVersionFilter = require('../../lib/createFileVersionFilter');
+const filters = require('../../lib/filters');
 
 const expect = chai.expect;
 const timeout = 15000;
@@ -81,7 +81,7 @@ describe('Azure Data Service', function azureDataServiceTest() {
       const oldestDate = moment(date).subtract(7, 'days');
       await azureDataService.pruneFilesOlderThan(oldestDate);
       const files = await azureService.listBlobs(containerName);
-      const dataFiles = files.filter(createFileVersionFilter(outputFile, version));
+      const dataFiles = files.filter(filters.createFileVersionFilter(outputFile, version));
       expect(dataFiles.length).to.equal(2);
     });
 
@@ -93,7 +93,7 @@ describe('Azure Data Service', function azureDataServiceTest() {
       const oldestDate = moment(date).add(7, 'days');
       await azureDataService.pruneFilesOlderThan(oldestDate);
       const files = await azureService.listBlobs(containerName);
-      const dataFiles = files.filter(createFileVersionFilter(outputFile, version));
+      const dataFiles = files.filter(filters.createFileVersionFilter(outputFile, version));
       expect(dataFiles.length).to.equal(1);
     });
   });

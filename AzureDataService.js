@@ -3,7 +3,6 @@ const requireEnv = require('require-environment-variables');
 requireEnv(['AZURE_STORAGE_CONNECTION_STRING']);
 
 const azureService = require('./lib/azureService');
-const createFileVersionFilter = require('./lib/createFileVersionFilter');
 const filters = require('./lib/filters');
 const fsHelper = require('./lib/fsHelper');
 const getDateFromFilename = require('./lib/getDateFromFilename');
@@ -51,7 +50,7 @@ class AzureDataService {
   }
 
   async getLatestData() {
-    const filter = createFileVersionFilter(this.outputFile, this.version);
+    const filter = filters.createFileVersionFilter(this.outputFile, this.version);
     const lastScan = await azureService.getLatestBlob(this.containerName, filter);
     if (lastScan) {
       return this.downloadLatest(lastScan.name, this.localFile);
@@ -79,7 +78,7 @@ class AzureDataService {
 
   async pruneDataFiles(oldestMoment, files) {
     const filter = filters.createExpiredDataFilter(this.outputFile, this.version, oldestMoment);
-    const fileVersionFilter = createFileVersionFilter(this.outputFile, this.version);
+    const fileVersionFilter = filters.createFileVersionFilter(this.outputFile, this.version);
     await this.pruneExpiredFiles(files, filter, fileVersionFilter);
   }
 

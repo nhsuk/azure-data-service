@@ -1,5 +1,5 @@
 const chai = require('chai');
-const createFileVersionFilter = require('../../lib/createFileVersionFilter');
+const createFileVersionFilter = require('../../lib/filters').createFileVersionFilter;
 
 const expect = chai.expect;
 
