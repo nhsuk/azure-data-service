@@ -1,4 +1,4 @@
-0.4.0 / TBA
+0.4.0 / 2018-05-29
 ==================
 - Provide function to purge old files
 
