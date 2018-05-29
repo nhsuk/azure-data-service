@@ -7,6 +7,7 @@ const filters = require('./lib/filters');
 const fsHelper = require('./lib/fsHelper');
 const getDateFromFilename = require('./lib/getDateFromFilename');
 const validateConfig = require('./lib/validateConfig');
+const libConfig = require('./lib/config');
 
 class AzureDataService {
   constructor(config) {
@@ -20,16 +21,16 @@ class AzureDataService {
     this.seedIdFile = `${config.outputFile}-seed-ids`;
     this.localSeedIdFile = `${this.outputDir}/${this.seedIdFile}.json`;
     this.version = config.version;
+    this.dateFormat = libConfig.dateFormat;
     validateConfig(this);
   }
 
-  // eslint-disable-next-line class-methods-use-this
   getSuffix(startMoment) {
-    return `-${startMoment.format('YYYYMMDD')}.json`;
+    return `-${startMoment.format(this.dateFormat)}.json`;
   }
 
   getSuffixWithVersion(startMoment) {
-    return `-${startMoment.format('YYYYMMDD')}-${this.version}.json`;
+    return `-${startMoment.format(this.dateFormat)}-${this.version}.json`;
   }
 
   async downloadLatest(blobName, filename) {
