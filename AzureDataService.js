@@ -8,10 +8,6 @@ const fsHelper = require('./lib/fsHelper');
 const getDateFromFilename = require('./lib/getDateFromFilename');
 const validateConfig = require('./lib/validateConfig');
 
-function getSuffix(startMoment) {
-  return `-${startMoment.format('YYYYMMDD')}.json`;
-}
-
 class AzureDataService {
   constructor(config) {
     this.log = config.log;
@@ -25,6 +21,11 @@ class AzureDataService {
     this.localSeedIdFile = `${this.outputDir}/${this.seedIdFile}.json`;
     this.version = config.version;
     validateConfig(this);
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  getSuffix(startMoment) {
+    return `-${startMoment.format('YYYYMMDD')}.json`;
   }
 
   getSuffixWithVersion(startMoment) {
@@ -68,7 +69,7 @@ class AzureDataService {
 
   async uploadIds(startMoment) {
     this.log.info(`Saving date stamped version of '${this.seedIdFile}' in Azure`);
-    await azureService.uploadToAzure(this.containerName, this.localSeedIdFile, `${this.seedIdFile}${getSuffix(startMoment)}`);
+    await azureService.uploadToAzure(this.containerName, this.localSeedIdFile, `${this.seedIdFile}${this.getSuffix(startMoment)}`);
   }
 
   async uploadSummary(startMoment) {
@@ -84,7 +85,7 @@ class AzureDataService {
 
   async pruneIdListFiles(oldestMoment, files) {
     const filter = filters.createExpiredIdListFilter(this.outputFile, this.version, oldestMoment);
-    const latestFilter = b => b.name.startsWith(`${this.seedIdFile}-`);
+    const latestFilter = filters.createIdListFilter(this.seedIdFile);
     await this.pruneExpiredFiles(files, filter, latestFilter);
   }
 
@@ -94,12 +95,8 @@ class AzureDataService {
       this.summaryFile,
       this.version, oldestMoment
     );
-    const expiredFiles = files.filter(filter);
-    // eslint-disable-next-line no-restricted-syntax
-    for (const file of expiredFiles) {
-      // eslint-disable-next-line no-await-in-loop
-      await azureService.deleteFromAzure(this.containerName, file.name);
-    }
+    const latestFilter = filters.createSummaryFileFilter(this.outputFile, this.summaryFile);
+    await this.pruneExpiredFiles(files, filter, latestFilter);
   }
 
   async pruneExpiredFiles(files, filter, latestFilter) {

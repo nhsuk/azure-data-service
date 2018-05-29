@@ -60,18 +60,37 @@ describe('Azure Data Service', function azureDataServiceTest() {
     return azureService.uploadToAzure(
       containerName,
       azureDataService.localFile,
-      `${outputFile}${azureDataService.getSuffixWithVersion(moment(date).subtract(days, 'days'))}`
+      `${azureDataService.outputFile}${azureDataService.getSuffixWithVersion(moment(date).subtract(days, 'days'))}`
+    );
+  }
+  function uploadOldDateStampedSummary(date, days) {
+    return azureService.uploadToAzure(
+      containerName,
+      azureDataService.localFile,
+      `${azureDataService.outputFile}-${azureDataService.summaryFile}${azureDataService.getSuffixWithVersion(moment(date).subtract(days, 'days'))}`
+    );
+  }
+
+  function uploadOldDateStampedIdList(date, days) {
+    return azureService.uploadToAzure(
+      containerName,
+      azureDataService.localSeedIdFile,
+      `${azureDataService.seedIdFile}${azureDataService.getSuffix(moment(date).subtract(days, 'days'))}`
     );
   }
 
   describe('prune functions', () => {
     after(async function deleteGeneratedFile() {
       this.timeout(timeout);
-      await azureService.deleteFromAzure(containerName, `${outputFile}-20180321-${version}.json`);
-      await azureService.deleteFromAzure(containerName, `${outputFile}-20180314-${version}.json`);
+      await azureService.deleteFromAzure(containerName, `${azureDataService.outputFile}-20180321-${version}.json`);
+      await azureService.deleteFromAzure(containerName, `${azureDataService.outputFile}-${azureDataService.summaryFile}-20180321-${version}.json`);
+      await azureService.deleteFromAzure(containerName, `${azureDataService.seedIdFile}-20180321.json`);
+      await azureService.deleteFromAzure(containerName, `${azureDataService.outputFile}-20180314-${version}.json`);
+      await azureService.deleteFromAzure(containerName, `${azureDataService.outputFile}-${azureDataService.summaryFile}-20180314-${version}.json`);
+      await azureService.deleteFromAzure(containerName, `${azureDataService.seedIdFile}-20180314.json`);
     });
 
-    it('should remove files older than date', async () => {
+    it('should remove data files older than date', async () => {
       const date = '20180321';
       await uploadOldDateStampedData(date, 0);
       await uploadOldDateStampedData(date, 7);
@@ -81,8 +100,42 @@ describe('Azure Data Service', function azureDataServiceTest() {
       const oldestDate = moment(date).subtract(7, 'days');
       await azureDataService.pruneFilesOlderThan(oldestDate);
       const files = await azureService.listBlobs(containerName);
-      const dataFiles = files.filter(filters.createFileVersionFilter(outputFile, version));
+      const dataFilter = filters.createFileVersionFilter(azureDataService.outputFile, version);
+      const dataFiles = files.filter(dataFilter);
       expect(dataFiles.length).to.equal(2);
+    });
+
+    it('should remove ID list files older than date', async () => {
+      const date = '20180321';
+      await uploadOldDateStampedIdList(date, 0);
+      await uploadOldDateStampedIdList(date, 7);
+      await uploadOldDateStampedIdList(date, 14);
+      await uploadOldDateStampedIdList(date, 21);
+
+      const oldestDate = moment(date).subtract(7, 'days');
+      await azureDataService.pruneFilesOlderThan(oldestDate);
+      const files = await azureService.listBlobs(containerName);
+      const idFilter = filters.createIdListFilter(azureDataService.seedIdFile, version);
+      const idFiles = files.filter(idFilter);
+      expect(idFiles.length).to.equal(2);
+    });
+
+    it('should remove summary files older than date', async () => {
+      const date = '20180321';
+      await uploadOldDateStampedSummary(date, 0);
+      await uploadOldDateStampedSummary(date, 7);
+      await uploadOldDateStampedSummary(date, 14);
+      await uploadOldDateStampedSummary(date, 21);
+
+      const oldestDate = moment(date).subtract(7, 'days');
+      await azureDataService.pruneFilesOlderThan(oldestDate);
+      const files = await azureService.listBlobs(containerName);
+      const summaryFilter = filters.createSummaryFileFilter(
+        azureDataService.outputFile,
+        azureDataService.summaryFile
+      );
+      const summaryFiles = files.filter(summaryFilter);
+      expect(summaryFiles.length).to.equal(2);
     });
 
     it('should not remove latest file, even if before oldest date', async () => {
@@ -95,6 +148,35 @@ describe('Azure Data Service', function azureDataServiceTest() {
       const files = await azureService.listBlobs(containerName);
       const dataFiles = files.filter(filters.createFileVersionFilter(outputFile, version));
       expect(dataFiles.length).to.equal(1);
+    });
+
+    it('should not remove latest ID file, even if before oldest date', async () => {
+      const date = '20180321';
+      await uploadOldDateStampedIdList(date, 0);
+      await uploadOldDateStampedIdList(date, 7);
+
+      const oldestDate = moment(date).add(7, 'days');
+      await azureDataService.pruneFilesOlderThan(oldestDate);
+      const files = await azureService.listBlobs(containerName);
+      const idFilter = filters.createIdListFilter(azureDataService.seedIdFile);
+      const idFiles = files.filter(idFilter);
+      expect(idFiles.length).to.equal(1);
+    });
+
+    it('should not remove latest summary file, even if before oldest date', async () => {
+      const date = '20180321';
+      await uploadOldDateStampedSummary(date, 0);
+      await uploadOldDateStampedSummary(date, 7);
+
+      const oldestDate = moment(date).add(7, 'days');
+      await azureDataService.pruneFilesOlderThan(oldestDate);
+      const files = await azureService.listBlobs(containerName);
+      const summaryFilter = filters.createSummaryFileFilter(
+        azureDataService.outputFile,
+        azureDataService.summaryFile
+      );
+      const summaryFiles = files.filter(summaryFilter);
+      expect(summaryFiles.length).to.equal(1);
     });
   });
 });
