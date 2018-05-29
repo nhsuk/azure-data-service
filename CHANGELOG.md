@@ -1,4 +1,4 @@
-0.3.0 / TBA
+0.4.0 / TBA
 ==================
 - Provide function to purge old files
 

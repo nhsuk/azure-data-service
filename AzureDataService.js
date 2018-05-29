@@ -118,7 +118,6 @@ class AzureDataService {
     if (files) {
       await this.pruneDataFiles(oldestMoment, files);
       await this.pruneIdListFiles(oldestMoment, files);
-      await this.pruneDataFiles(oldestMoment, files);
       await this.pruneSummaryFiles(oldestMoment, files);
     }
   }
